@@ -1,0 +1,61 @@
+x=(1,3,"Hello")
+print(x)
+
+y="abc"
+print(y)
+
+z=3
+print(z)
+
+
+print("ABC")
+print(1)
+
+a=4+6
+print(a)
+
+e="he"+"lp"
+print(e)
+
+f=e
+print(f)
+
+print((1,2,"Directly printing a tuple"))
+
+k1=((1,2,"Hello"),1,2)
+
+print("INDEXING")
+print(k1[0])
+print(k1[-1])
+
+print("BEFORE REPLACING IN K1")
+print(k1)
+k1[1]=(1,56)
+k1[2]="replaced"
+print("AFTER REPLACING IN k1 ")
+print(k1)
+
+K=k1[1]
+print("K is equal to ")
+print(K)
+
+(ID1,ID2,ID3)=T
+
+p=("hello","how are you","fine",65,53234,578,6432,2367)
+o=p[2:5]
+print("after slicing p o is")
+print(o)
+
+y=p[3:]
+print("after slicing p y is")
+print(y)
+
+u=p[:4]
+print("after slicing p u is")
+print(u)
+
+r=(118,712,"fr")+("floor", 12)
+print(r)
+
+b = (12,"hi")+(13,"bye")
+print(b)

@@ -1,0 +1,6 @@
+-cp
+.;antlr-3.5.2-complete.jar
+ActionRoutines.java
+TestT.java
+TLexer.java
+TParser.java

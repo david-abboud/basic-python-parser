@@ -1,0 +1,10 @@
+T=("hello",2,"world",("tuple",4))
+a="1"
+b="string"
+x=420+80
+y="string"+"hello"
+x=T[2]
+T[2]=3
+print(x)
+
+T=("asd",1)+("asd",123)
