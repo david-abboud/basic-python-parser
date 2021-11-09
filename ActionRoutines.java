@@ -1,7 +1,10 @@
+import java.io.InvalidObjectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+
+import jdk.jshell.Snippet;
 
 /**
  * @author David Abboud
@@ -21,9 +24,7 @@ public class ActionRoutines {
 		ArrayList<Object> newArr = new ArrayList<>();
 		newArr.add(Integer.valueOf(int1));
 		map.put(ID, newArr);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
+
 	}
 
 	/**
@@ -36,9 +37,7 @@ public class ActionRoutines {
 		ArrayList<Object> newArr = new ArrayList<>();
 		newArr.add(str.substring(1, str.length() - 1));
 		map.put(ID, newArr);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
+
 	}
 
 	/**
@@ -53,6 +52,99 @@ public class ActionRoutines {
 	 */
 	public ArrayList<Object> initMapTup(String ID, String tupStr) {
 
+		ArrayList<Object> newArr = new ArrayList<>();
+
+		if (tupStr.length() == 2) {
+			String emptyStr = "";
+			newArr.add(emptyStr);
+			map.put(ID, newArr);
+			return newArr;
+		}
+
+		for (int i = 1; i < tupStr.length(); i++) {
+
+			if (tupStr.charAt(i) == ')') {
+				break;
+			}
+
+			if (tupStr.charAt(i) == '(') { // tuple
+
+				ArrayList<Object> lowLvl = new ArrayList<>();
+
+				int j = i + 1;
+				while (tupStr.charAt(j) != ')') {
+
+					String str = "";
+					while (tupStr.charAt(j) != ',') {
+
+						if (tupStr.charAt(j) == '"' && tupStr.charAt(j + 1) != ')') {
+							j++;
+						}
+
+						if (tupStr.charAt(j) == '"' && tupStr.charAt(j + 1) == ')') {
+							break;
+						}
+
+						if (tupStr.charAt(j) != ')') {
+							str = str + tupStr.charAt(j);
+							j++;
+						}
+
+					}
+
+					lowLvl.add(str);
+					j = j + 1;
+					i = j - 1;
+				}
+
+				newArr.add(lowLvl); // add the tuple that is inside the big tuple, to the big tuple.
+				// what follows is ',' followed by the next object.
+				i = i + 2; // go past the ','
+			}
+
+			else if (tupStr.charAt(i) == '"') { // string
+				String str2 = "";
+				i++;
+
+				while (tupStr.charAt(i) != '"') {
+					str2 = str2 + tupStr.charAt(i);
+					i++;
+				}
+				newArr.add(str2);
+				i = i + 1;
+
+			}
+
+			else { // integer
+				String str3 = "";
+
+				while (tupStr.charAt(i) != ',') {
+					if (tupStr.charAt(i + 1) == ')') {
+						str3 = str3 + tupStr.charAt(i);
+						break;
+					}
+					str3 = str3 + tupStr.charAt(i);
+					i++;
+				}
+				newArr.add(str3);
+
+			}
+
+		}
+
+		map.put(ID, newArr);
+
+		return newArr;
+	}
+
+	/**
+	 * Same function as initMapTup, but without modifying the HashMap (without the
+	 * "map.put()" statements). Creates an ArrayList out of a tuple.
+	 * 
+	 * @param tupStr tuple string to be converted into an ArrayList of Objects
+	 * @return an ArrayList of Objects representing the tuple string
+	 */
+	public ArrayList<Object> createArr(String tupStr) {
 		ArrayList<Object> newArr = new ArrayList<>();
 
 		for (int i = 1; i < tupStr.length(); i++) {
@@ -99,8 +191,7 @@ public class ActionRoutines {
 			else if (tupStr.charAt(i) == '"') { // string
 				String str2 = "";
 				i++;
-				// ( (123, 2,"Hello") , "he" , 23)
-				// i
+
 				while (tupStr.charAt(i) != '"') {
 					str2 = str2 + tupStr.charAt(i);
 					i++;
@@ -121,100 +212,11 @@ public class ActionRoutines {
 					i++;
 				}
 				newArr.add(str3);
-				// i=i+2;
+
 			}
 
 		}
-		// System.out.println("!!!");
-		map.put(ID, newArr);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
-		return newArr;
-	}
 
-	/**
-	 * Same function as initMapTup, but without modifying the HashMap (without the
-	 * "map.put()" statements). Creates an ArrayList out of a tuple.
-	 * 
-	 * @param tupStr tuple string to be converted into an ArrayList of Objects
-	 * @return an ArrayList of Objects representing the tuple string
-	 */
-	public ArrayList<Object> createArr(String tupStr) {
-		ArrayList<Object> newArr = new ArrayList<>();
-
-		for (int i = 1; i < tupStr.length(); i++) {// 0123456789abcdefghij tupstrlen=19 , last index = 18
-													// k1=((1,2,"Hello"),1,2)
-													// i
-													// j
-			if (tupStr.charAt(i) == ')') {
-				break;
-			}
-
-			if (tupStr.charAt(i) == '(') { // tuple
-
-				ArrayList<Object> lowLvl = new ArrayList<>();
-
-				int j = i + 1;
-				while (tupStr.charAt(j) != ')') {
-
-					String str = "";
-					while (tupStr.charAt(j) != ',') {
-
-						if (tupStr.charAt(j) == '"' && tupStr.charAt(j + 1) != ')') {
-							j++;
-						}
-
-						if (tupStr.charAt(j) == '"' && tupStr.charAt(j + 1) == ')') {
-							break;
-						}
-
-						if (tupStr.charAt(j) != ')') {
-							str = str + tupStr.charAt(j);
-							j++;
-						}
-
-					}
-
-					lowLvl.add(str);
-					j = j + 1;
-					i = j - 1;
-				}
-				System.out.println("lowlvl : " + lowLvl);
-				newArr.add(lowLvl); // add the tuple that is inside the big tuple, to the big tuple.
-				// what follows is ',' followed by the next object.
-				i = i + 2; // go past the ','
-			}
-
-			else if (tupStr.charAt(i) == '"') { // string
-				String str2 = "";
-				i++;
-				// ( (123, 2,"Hello") , "he" , 23)
-				// i
-				while (tupStr.charAt(i) != '"') {
-					str2 = str2 + tupStr.charAt(i);
-					i++;
-				}
-				newArr.add(str2);
-				i = i + 1;
-
-			}
-
-			else { // integer
-				String str3 = "";
-				while (tupStr.charAt(i) != ',') {
-					if (tupStr.charAt(i + 1) == ')') {
-						str3 = str3 + tupStr.charAt(i);
-						break;
-					}
-					str3 = str3 + tupStr.charAt(i);
-					i++;
-				}
-				newArr.add(str3);
-				// i=i+2;
-			}
-
-		}
 		return newArr;
 	}
 
@@ -225,61 +227,142 @@ public class ActionRoutines {
 	 * @param id2 ID on the right-hand side
 	 */
 	public void initMapID(String id1, String id2) { // id1=id2
-		ArrayList<Object> newArr = new ArrayList<>();
-		Object str = map.get(id2).get(0);
-		newArr.add(str);
-		map.put(id1, newArr);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
+		try {
+			Integer i = Integer.valueOf(map.get(id2).toString().substring(1, map.get(id2).toString().length() - 1));
+			ArrayList<Object> newArr = new ArrayList<>();
+			Object str = map.get(id2).get(0);
+			newArr.add(str);
+			map.put(id1, newArr);
+		} catch (Exception E) {
+			if (map.get(id2).toString().indexOf(',') != -1) {
+				ArrayList<Object> str = map.get(id2);
+				map.put(id1, str);
+
+			} else {
+				ArrayList<Object> newArr = new ArrayList<>();
+				Object str = map.get(id2).get(0);
+				newArr.add(str);
+				map.put(id1, newArr);
+			}
+
+		}
+
 	}
 
 	/**
-	 * Converts input a and b, which are strings, into Integers and adds them.
-	 * Stores result in HashMap tied with given ID.
+	 * Applied recursively. Increments the value in the hashmap whose key is ID with
+	 * an increment equal to the Integer value of i1.
 	 * 
-	 * @param a  Integer a as a string
-	 * @param b  Integer b as a string
-	 * @param ID Variable Name
-	 * @return Integer c = a + b
+	 * @param ID Hashmap key
+	 * @param i1 Increment amount
+	 * @return The addition of the value whose key is ID in the HashMap and i1
 	 */
-	public Integer addInteger(String ID, String a, String b) {
-
+	public Integer addInteger(String ID, String i1) {
 		ArrayList<Object> newArr = new ArrayList<>();
-		Integer c = Integer.valueOf(a);
-		Integer d = Integer.valueOf(b);
-
-		Integer x = c + d;
-		newArr.add(x);
-		map.put(ID, newArr);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
-		// System.out.println("from addInteger : " + x);
-		return x;
+		Object obj = map.get(ID).get(0);
+		Object obj2 = Integer.valueOf(obj.toString()) + Integer.valueOf(i1);
+		newArr.add(obj2);
+		map.replace(ID, newArr);
+		return Integer.valueOf(obj2.toString());
 	}
 
 	/**
-	 * Concatenates two strings, places them into the variable ID through the
-	 * HashMap.
+	 * Applied recursively. Appends i1 to the String in the hashmap whose key is ID.
 	 * 
-	 * @param ID variable in which the concatenation will reside
-	 * @param a  first string
-	 * @param b  second string
-	 * @return ID, the concatenation of both a and b
+	 * @param ID Hashmap key
+	 * @param i1 String that will be appende
+	 * @return The concatenation of the String whose key is ID in the HashMap and i1
 	 */
-	public String addString(String ID, String a, String b) {
+	public String addString(String ID, String i1) {
 		ArrayList<Object> newArr = new ArrayList<>();
-		// String[] arr = {a,b};
-		String str = a.substring(1, a.length() - 1) + b.substring(1, a.length() - 1);
+		Object obj = map.get(ID).get(0);
+
+		String str = obj.toString().substring(0, obj.toString().length()) + i1.substring(1, i1.length() - 1);
 		newArr.add(str);
-		map.put(ID, newArr);
-		// initMapStr(ID, str);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
-		// System.out.println("from addInteger : " + x);
+		map.replace(ID, newArr);
 		return str;
+	}
+
+	/**
+	 * Used for printing only.
+	 * 
+	 * @param a First Integer
+	 * @param b Second Integer
+	 * @return The addition of both Integers, to be printed.
+	 */
+	public Integer addIntegerPrint(String a, String b) {
+		return Integer.valueOf(a) + Integer.valueOf(b);
+	}
+
+	/**
+	 * Used for printing only.
+	 * 
+	 * @param a First String
+	 * @param b First String
+	 * @return The concatenation of both strings, to be printed.s
+	 */
+	public String addStringPrint(String a, String b) {
+		return a.substring(1, a.length() - 1) + b.substring(1, a.length() - 1);
+	}
+
+	/**
+	 * Used recursively. Determines type of Object stored in the HashMap with key b,
+	 * and adds it to the object with key ID in the Hashmap accordingly.
+	 * 
+	 * @param ID HashMap Key
+	 * @param b  Object to be added
+	 * @return The addition of both. Concatenation if String or tuple, and binary
+	 *         addition if Integer.
+	 */
+	public Object addID(String ID, String b) {
+
+		try {
+			Integer i = Integer.valueOf(map.get(b).toString().substring(1, map.get(b).toString().length() - 1)); // integer
+			String c = map.get(b).toString().substring(1, map.get(b).toString().length() - 1);
+			return addInteger(ID, c);
+		} catch (Exception E) {
+			if (map.get(b).toString().indexOf(',') != -1) { // tuple
+
+				String c = map.get(b).toString().substring(1, map.get(b).toString().length() - 1);
+
+				return addTuple2(ID, c);
+			} else { // string
+				String c = map.get(b).toString();
+				return addString(ID, c);
+			}
+		}
+
+	}
+
+	/**
+	 * Used for printing. Determines the type of both operands and adds them
+	 * accordingly.
+	 * 
+	 * @param a First operand, as a String. Must be of the same type as b.
+	 * @param b Second operand, as a String. Must be of the same type as b.
+	 * @return Returns the addition of both accordingly. Binary addition if
+	 *         Integers, and concatenation if tuple or String.
+	 */
+	public Object addIDPrint(String a, String b) {
+		if (a.charAt(0) == '(' && b.charAt(0) == '(') {
+			String c;
+			c = map.get(a).toString().substring(1, map.get(a).toString().length() - 1); // remove the [ ]
+			String d;
+			d = map.get(b).toString().substring(1, map.get(b).toString().length() - 1);
+			return addTuplePrint(c, d);
+		} else if (a.charAt(0) == '"' && b.charAt(0) == '"') {
+			String c;
+			c = map.get(a).toString().substring(1, map.get(a).toString().length() - 1);
+			String d;
+			d = map.get(b).toString().substring(1, map.get(b).toString().length() - 1);
+			return addStringPrint(c, d);
+		} else {
+			String c;
+			c = map.get(a).toString().substring(1, map.get(a).toString().length() - 1);
+			String d;
+			d = map.get(b).toString().substring(1, map.get(b).toString().length() - 1);
+			return addIntegerPrint(c, d);
+		}
 	}
 
 	/**
@@ -313,6 +396,18 @@ public class ActionRoutines {
 	}
 
 	/**
+	 * Prints nothing if empty. Else, print tuple.
+	 * 
+	 * @param tuple
+	 */
+	public void printTuple(String tuple) {
+		if (tuple.length() == 2) {
+			System.out.println("");
+		} else
+			System.out.println(tuple);
+	}
+
+	/**
 	 * Converts the two tuples into ArrayLists of Objects, concatenates them, then
 	 * stores them in a variable through the HashMap.
 	 * 
@@ -322,17 +417,57 @@ public class ActionRoutines {
 	 * @return an ArrayList of Objects which represents the concatenation of the two
 	 *         tuples. tup1 followed by tup2.
 	 */
-	public ArrayList<Object> addTuple(String ID, String tup1, String tup2) {
+	public ArrayList<Object> addTuple2(String ID, String tup1) {
+
+		ArrayList<Object> arr1 = map.get(ID);
+
+		ArrayList<Object> arr2 = createArr('(' + tup1 + ')');
+
+		arr1.addAll(arr2);
+
+		map.replace(ID, arr1);
+
+		return arr1;
+
+	}
+
+	/**
+	 * Concatenated two tuples.
+	 * 
+	 * @param tup1 First tuple
+	 * @param tup2 Second tuple
+	 * @return the concatenation of both Strings as a String.
+	 */
+	public String addTuple(String tup1, String tup2) {
+
+		if (tup1.length() > 2 && tup2.length() > 2) {
+			String s1 = tup1.substring(1, tup1.length() - 1);
+			String s2 = tup2.substring(5, tup2.length() - 1); // handles "null" tuple in grammar's base case
+
+			String sNew1 = '(' + s1 + "," + s2 + ')';
+
+			return sNew1;
+		}
+
+		else {
+
+			return tup1;
+		}
+
+	}
+
+	/**
+	 * Appends two tuples for printing.
+	 * 
+	 * @param tup1 First tuple, as a String
+	 * @param tup2 Second tuple, as a String
+	 * @return an ArrayList of Objects that is the union of both tuples.
+	 */
+	public ArrayList<Object> addTuplePrint(String tup1, String tup2) {
 		ArrayList<Object> arr1 = createArr(tup1);
 		ArrayList<Object> arr2 = createArr(tup2);
-		System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ " + tup1);
 		arr1.addAll(arr2);
-		map.put(ID, arr1);
-		System.out.println("-----------------------------------------------");
-		System.out.println("hashMap values as of now: " + Arrays.asList(map));
-		System.out.println("-----------------------------------------------");
 		return arr1;
-		
 	}
 
 	/**
@@ -376,53 +511,87 @@ public class ActionRoutines {
 	 * @param index index of the tuple
 	 */
 	public void printGet(String tuple, String index) { // ID = tuple[index]
-		// System.out.println("INDEXING:");
-		System.out.println(tuple + '[' + index + ']' + '=' + get(tuple, index));
+
+		System.out.println(get(tuple, index));
 	}
 
 	/**
 	 * Replaces a value inside a tuple by either a string or a integer, at the given
-	 * index value
+	 * index value python tuples are immutable. uncomment if assumed mutable.
 	 * 
 	 * @param ID    tuple ID
 	 * @param index index of tuple element to be replaced
 	 * @param value string or integer that will replace element. (If integer, will
 	 *              be converted to Integer object)
 	 */
-	public void replaceIntStr(String ID, String index, String value) { // ID[index]=value
-		// System.out.println("BEFORE REPLACING, k1 = " + map.get(ID));
-		ArrayList<Object> arr = map.get(ID);
-		arr.remove(index);
-		// System.out.println(value + " will be inserted at index " + index);
-		arr.add(Integer.valueOf(index), value);
-		// System.out.println("AFTER REPLACING, k1 = " + map.get(ID));
-	}
+	// public void replaceIntStr(String ID, String index, String value) { //
+	// ID[index]=value
+	// ArrayList<Object> arr = map.get(ID);
+	// arr.remove(index);
+	// arr.add(Integer.valueOf(index), value);
+	// }
 
 	/**
 	 * Replaces a value inside a tuple by a tuple at the given index value. Converts
 	 * tuple passed as a String (value paramater) to an ArrayList, then inserts it
-	 * into the HashMap.
+	 * into the HashMap. python tuples are immutable. uncomment if assumed mutable.
 	 * 
 	 * @param ID    tuple ID
 	 * @param index index of tuple element to be replaced
 	 * @param value tuple (as String)
 	 */
-	public void replaceTup(String ID, String index, String value) {
-		ArrayList<Object> arr = createArr(value);
+	// public void replaceTup(String ID, String index, String value) {
+	// ArrayList<Object> arr = createArr(value);
+	// ArrayList<Object> arr2 = map.get(ID);
+	// arr2.remove(index);
+	// arr2.add(Integer.valueOf(index), arr);
+	// }
+
+	/**
+	 * Extracts each element of a tuple into a variable. Variable at index i in the
+	 * tuple of variables will be assigned the value at index i of the tuple of
+	 * values.
+	 * 
+	 * @param tuple A tuple of variables.
+	 * @param ID    Hashmap key : ID of a tuple containing values to be extracted.
+	 */
+	public void unpack(String tuple, String ID) {
+		ArrayList<Object> tempIDNames = createArr(tuple);
 		ArrayList<Object> arr2 = map.get(ID);
-		arr2.remove(index);
-		arr2.add(Integer.valueOf(index), arr);
+
+		if (tempIDNames.size() != arr2.size()) {
+			System.out.println("Unpack unsupported : tuples are of different sizes"); // no Exception with try/catch
+		}
+
+		for (int i = 0; i < arr2.size(); i++) {
+			ArrayList<Object> temp = new ArrayList<>();
+			temp.add(arr2.get(i));
+			map.put(tempIDNames.get(i).toString(), temp);
+		}
 	}
 
 	/**
-	 * the elements of tuple T are extracted back into variables in varargs.
+	 * Extracts each element of a tuple into a variable. Variable at index i in the
+	 * tuple of variables will be assigned the value at index i of the tuple of
+	 * values.
 	 * 
-	 * @param tuple The tuple to be extracted, as a String
-	 * @param s     Variables to which the tuple will be unpacked
+	 * @param IDtuple A tuple of variables.
+	 * @param tuple   Tuple containing values to be extracted.
 	 */
-	public void unpack(String tuple, String... s) {
-		System.out.println("unpack was detected");
+	public void unpack2(String IDtuple, String tuple) {
+		ArrayList<Object> tempIDNames = createArr(IDtuple);
+		ArrayList<Object> arr2 = createArr(tuple);
 
+		if (tempIDNames.size() != arr2.size()) {
+			System.out.println("Unpack unsupported : tuples are of different sizes");
+			return;
+		}
+
+		for (int i = 0; i < arr2.size(); i++) {// (ID4,ID5,ID6)=(1,"HELLO",4))
+			ArrayList<Object> temp = new ArrayList<>();
+			temp.add(arr2.get(i));
+			map.put(tempIDNames.get(i).toString(), temp);
+		}
 	}
 
 	/**
@@ -436,7 +605,6 @@ public class ActionRoutines {
 	 * @return an ArrayList of Objects containing the sliced elements
 	 */
 	public ArrayList<Object> slice1(String id1, String id2, String index1, String index2) { // id1 = id2[index1:index2]
-		// System.out.println("SLICE1 CALLED");
 
 		int int1 = Integer.valueOf(index1);
 		int int2 = Integer.valueOf(index2);
@@ -446,9 +614,7 @@ public class ActionRoutines {
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 
@@ -457,27 +623,21 @@ public class ActionRoutines {
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		} else if (int1 <= 0 && int2 >= 0) {
 			List<Object> arr = map.get(id2).subList(map.get(id2).size() + int1, int2);
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		} else {
 			List<Object> arr = map.get(id2).subList(map.get(id2).size() + int1, map.get(id2).size() + int2);
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 	}
@@ -499,9 +659,7 @@ public class ActionRoutines {
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 
@@ -510,9 +668,7 @@ public class ActionRoutines {
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 	}
@@ -534,22 +690,24 @@ public class ActionRoutines {
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 
 		else {
-			List<Object> arr = map.get(id2).subList(0, map.get(id2).size() - int1);
+			List<Object> arr = map.get(id2).subList(0, map.get(id2).size() + int1);
 
 			ArrayList<Object> arr2 = new ArrayList<>(arr);
 			map.put(id1, arr2);
-			System.out.println("-----------------------------------------------");
-			System.out.println("hashMap values as of now: " + Arrays.asList(map));
-			System.out.println("-----------------------------------------------");
+
 			return arr2;
 		}
 	}
 
+	/**
+	 * prints the HashMap containing all variables and their respective values.
+	 */
+	public void printHashmap() {
+		System.out.println("HashMap values :" + Arrays.asList(map));
+	}
 }
